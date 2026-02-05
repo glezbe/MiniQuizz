@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Juego (Host)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div class="app-container">
+  <div class="card-shell">
+    <h1 class="mb-2">Juego (Host)</h1>
+
+    <!-- Mensaje -->
+    <div th:if="${msg != null}" class="alert alert-warning" th:text="${msg}">Mensaje</div>
+
+    <!-- Si hay mensaje (ej: "selecciona preguntas"), mostramos botones -->
+    <div th:if="${msg != null}" class="d-flex gap-2 mb-3">
+      <a class="btn btn-outline-primary"
+         th:href="@{/room/{id}/questions(id=${room.id})}">
+        Elegir preguntas
+      </a>
+
+      <a class="btn btn-outline-light ms-auto"
+         th:href="@{/room/{id}(id=${room.id})}">
+        Volver a sala
+      </a>
+    </div>
+
+    <div th:if="${question != null}">
+
+      <!-- ✅ Cabecera con contador -->
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <div class="text-secondary" th:text="'Pregunta ' + ${index} + ' / ' + ${total}">Pregunta</div>
+
+        <div class="ms-auto badge bg-dark fs-6">
+          Tiempo: <span id="timer" th:text="${seconds}">30</span>s
+        </div>
+      </div>
+
+      <h4 class="mb-3" th:text="${question.statement}">Enunciado</h4>
+
+      <div class="mb-2"><strong>A:</strong> <span th:text="${question.optionA}">A</span></div>
+      <div class="mb-2"><strong>B:</strong> <span th:text="${question.optionB}">B</span></div>
+      <div class="mb-2"><strong>C:</strong> <span th:text="${question.optionC}">C</span></div>
+      <div class="mb-3"><strong>D:</strong> <span th:text="${question.optionD}">D</span></div>
+
+      <div class="alert alert-info mt-3">
+        <strong>Correcta:</strong>
+        <span th:text="${question.correctOption}">B</span>
+      </div>
+
+      <div class="d-flex gap-2 align-items-center mt-3">
+
+        <!-- Anterior -->
+        <a class="btn btn-outline-light"
+           th:if="${hasPrev}"
+           th:href="@{/game/host/{id}/prev(id=${room.id})}">
+          Anterior
+        </a>
+
+        <!-- Siguiente -->
+        <a class="btn btn-main"
+           th:if="${hasNext}"
+           th:href="@{/game/host/{id}/next(id=${room.id})}">
+          Siguiente
+        </a>
+
+        <!-- Terminar -->
+        <a class="btn btn-outline-danger"
+           th:if="${!hasNext}"
+           th:href="@{/game/host/{id}/next(id=${room.id})}"
+           onclick="return confirm('¿Terminar la partida y mostrar resultados?');">
+          Terminar
+        </a>
+
+        <!-- Volver a sala -->
+        <a class="btn btn-outline-light ms-auto"
+           th:href="@{/room/{id}(id=${room.id})}">
+          Volver a sala
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ✅ TIMER: al llegar a 0 -> /next (o termina si es la última) -->
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const seconds = /*[[${seconds}]]*/ 30;
+  const roomId = /*[[${room.id}]]*/ 0;
+
+  let remaining = seconds;
+  const timerEl = document.getElementById("timer");
+
+  if (timerEl) {
+    const interval = setInterval(() => {
+      remaining--;
+      if (remaining < 0) remaining = 0;
+      timerEl.textContent = remaining;
+
+      if (remaining <= 0) {
+        clearInterval(interval);
+        window.location.href = `/game/host/${roomId}/next`;
+      }
+    }, 1000);
+  }
+  /*]]>*/
+</script>
+
+</body>
+</html>

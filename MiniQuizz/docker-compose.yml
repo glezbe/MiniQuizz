@@ -1,0 +1,44 @@
+version: '3.7'
+services:
+  #Contenedor de la BBDD
+  director-mysql:
+    image: mysql:8.0
+    volumes:
+      - bdcine:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=Cine
+      - MYSQL_PASSWORD=root
+    ports:
+      - 3306:3306
+    networks:
+      - director-mysql
+
+  # Contenedor de la aplicación
+  myapp-main:
+    image: acrmvc.azurecr.io/jgce/spring_mvc:1.0
+    networks:
+      - director-mysql
+    restart: on-failure
+    depends_on:
+      - director-mysql
+    ports:
+      - 8080:8080
+    environment:
+      - DATABASE_HOST=director-mysql
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=root
+      - DATABASE_NAME=Cine
+      - DATABASE_PORT=3306
+# red que comunica ambos contenedores
+networks:
+  director-mysql:
+
+# volumne de datos permanentes
+volumes:
+  bdcine:
+    driver: azure_file
+    driver_opts:
+      share_name: vlmcine
+      storage_account_name: cinestorage
+

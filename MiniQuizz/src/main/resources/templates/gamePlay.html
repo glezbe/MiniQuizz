@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Juego</title>
+
+  <!-- Puedes dejarlo, pero ojo: recarga la página cada 2s -->
+  <meta http-equiv="refresh" content="2">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div class="app-container">
+  <div class="card-shell">
+
+    <h1 class="mb-2">Juego</h1>
+    <div class="text-secondary mb-3" th:text="'PIN: ' + ${pin}">PIN</div>
+
+    <div th:if="${msg != null}" class="alert alert-info" th:text="${msg}">Mensaje</div>
+
+    <div th:if="${question != null}">
+      <div class="text-secondary mb-2" th:text="'Pregunta ' + ${index} + ' / ' + ${total}">Pregunta</div>
+      <h4 class="mb-3" th:text="${question.statement}">Enunciado</h4>
+
+      <!-- ✅ FORMULARIO -->
+      <form id="answerForm" th:action="@{/game/answer/{pin}(pin=${pin})}" method="post">
+
+        <!-- ✅ importantísimo: manda qué pregunta estás respondiendo -->
+        <input type="hidden" name="questionId" th:value="${question.id}" />
+
+        <div class="list-group mb-3">
+
+          <label class="list-group-item d-flex align-items-center">
+            <input class="form-check-input me-3" type="radio" name="option" value="A" required
+                   th:disabled="${alreadyAnswered}">
+            <span th:text="'A) ' + ${question.optionA}">A)</span>
+          </label>
+
+          <label class="list-group-item d-flex align-items-center">
+            <input class="form-check-input me-3" type="radio" name="option" value="B" required
+                   th:disabled="${alreadyAnswered}">
+            <span th:text="'B) ' + ${question.optionB}">B)</span>
+          </label>
+
+          <label class="list-group-item d-flex align-items-center">
+            <input class="form-check-input me-3" type="radio" name="option" value="C" required
+                   th:disabled="${alreadyAnswered}">
+            <span th:text="'C) ' + ${question.optionC}">C)</span>
+          </label>
+
+          <label class="list-group-item d-flex align-items-center">
+            <input class="form-check-input me-3" type="radio" name="option" value="D" required
+                   th:disabled="${alreadyAnswered}">
+            <span th:text="'D) ' + ${question.optionD}">D)</span>
+          </label>
+
+        </div>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-main" type="submit" th:disabled="${alreadyAnswered}">
+            <span th:text="${alreadyAnswered} ? 'Respuesta enviada' : 'Enviar respuesta'">Enviar</span>
+          </button>
+
+          <a class="btn btn-outline-light ms-auto"
+             th:href="@{/lobby/{pin}(pin=${pin})}">
+            Volver al lobby
+          </a>
+        </div>
+
+      </form>
+
+      <div th:if="${alreadyAnswered}" class="alert alert-success mt-3">
+        Ya has respondido esta pregunta ✅
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("answerForm");
+    if (!form) return;
+
+    form.addEventListener("submit", () => {
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+      // NO deshabilites los radios: si no, "option" no viaja
+    });
+  });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+
+  
+version: '3'
+services:
+#Contenedor de la BBDD
+  director-mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=Cine
+#      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+    ports:
+      - 3306:3306
+    networks:
+      - director-mysql
+    volumes:
+      - ./mysql/AD_U5_Cine.sql:/docker-entrypoint-initdb.d/AD_U5_Cine.sql
+      - ./sql:/var/lib/mysql
+
+
+# Contenedor de la aplicación
+  myapp-main:
+    image: jgce/spring_mvc:1.0
+    networks:
+      - director-mysql
+    restart: on-failure
+    depends_on:
+      - director-mysql
+    ports:
+      - 8080:8080
+    environment:
+      - DATABASE_HOST=director-mysql
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=root
+      - DATABASE_NAME=Cine
+      - DATABASE_PORT=3306
+ 
+# red que comunica ambos contenedores
+networks:
+  director-mysql:
